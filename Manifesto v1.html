@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sé el arquitecto de tu vida</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: oklch(0.965 0.012 85);
+    --ink: oklch(0.26 0.06 40);
+    --ink-soft: oklch(0.45 0.04 40);
+    --rule: oklch(0.85 0.02 80);
+    --accent: oklch(0.58 0.14 35);
+    --paper-shadow: oklch(0.92 0.018 80);
+  }
+  [data-mode="dark"] {
+    --bg: oklch(0.18 0.02 40);
+    --ink: oklch(0.94 0.02 85);
+    --ink-soft: oklch(0.72 0.03 80);
+    --rule: oklch(0.32 0.02 60);
+    --accent: oklch(0.72 0.13 45);
+    --paper-shadow: oklch(0.22 0.025 50);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Instrument Serif', 'Fraunces', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background 600ms ease, color 600ms ease;
+  }
+
+  /* paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(var(--paper-shadow) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    z-index: 0;
+  }
+  [data-mode="dark"] body::before { mix-blend-mode: screen; opacity: 0.12; }
+
+  /* top bar */
+  .chrome {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 28px 44px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .chrome .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chrome .mark .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  .chrome .meta {
+    display: flex;
+    gap: 28px;
+  }
+
+  /* main stage */
+  main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 80px;
+  }
+
+  .manifesto {
+    width: 100%;
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+  }
+
+  .line {
+    display: block;
+    font-size: clamp(56px, 12vw, 196px);
+    padding: 0 6vw;
+    color: var(--ink);
+    will-change: transform, opacity, filter;
+  }
+
+  /* layout matches the napkin: short-long / short / med-right / full-bleed */
+  .l1 {
+    text-align: left;
+    padding-left: 14vw;
+    font-style: normal;
+  }
+  .l2 {
+    text-align: left;
+    padding-left: 28vw;
+    font-size: clamp(40px, 7vw, 110px);
+    color: var(--ink-soft);
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+  .l3 {
+    text-align: right;
+    padding-right: 8vw;
+    color: var(--accent);
+    font-style: italic;
+  }
+  .l4 {
+    text-align: left;
+    padding-left: 4vw;
+    padding-right: 4vw;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  [data-align="centered"] .l1 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l2 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l3 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l4 { text-align: center; }
+
+  [data-align="left"] .l1,
+  [data-align="left"] .l2,
+  [data-align="left"] .l3,
+  [data-align="left"] .l4 {
+    text-align: left;
+    padding-left: 6vw;
+    padding-right: 6vw;
+  }
+
+  /* font system swap */
+  [data-font="newsreader"] .manifesto { font-family: 'Newsreader', Georgia, serif; }
+  [data-font="fraunces"]   .manifesto { font-family: 'Fraunces', Georgia, serif; font-weight: 350; }
+  [data-font="instrument"] .manifesto { font-family: 'Instrument Serif', Georgia, serif; }
+
+  /* underline accent under "IA" */
+  .ia {
+    position: relative;
+    display: inline-block;
+    font-style: italic;
+  }
+  .ia::after {
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: 0.06em;
+    height: 0.07em;
+    background: var(--accent);
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: drawline 1100ms cubic-bezier(.7,0,.2,1) 1900ms forwards;
+  }
+
+  @keyframes drawline {
+    to { transform: scaleX(1); }
+  }
+
+  /* line entry animation */
+  .line {
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(6px);
+    animation: rise 1100ms cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .l1 { animation-delay: 200ms; }
+  .l2 { animation-delay: 600ms; }
+  .l3 { animation-delay: 1000ms; }
+  .l4 { animation-delay: 1400ms; }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  body[data-anim="off"] .line {
+    opacity: 1; transform: none; filter: none; animation: none;
+  }
+  body[data-anim="off"] .ia::after {
+    transform: scaleX(1); animation: none;
+  }
+
+  /* footer */
+  footer {
+    position: relative;
+    z-index: 2;
+    padding: 28px 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  footer .left { max-width: 38ch; line-height: 1.6; text-transform: none; letter-spacing: 0.02em; font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--ink-soft); }
+  footer .right { display: flex; gap: 28px; align-items: flex-end; }
+  footer .num { font-size: 11px; }
+  footer .pill {
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 8px 14px;
+    color: var(--ink);
+    background: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    cursor: pointer;
+    transition: background 200ms, color 200ms;
+  }
+  footer .pill:hover { background: var(--ink); color: var(--bg); }
+
+  /* a vertical hairline between the stage and the chrome to suggest a printed page */
+  .rule {
+    position: fixed;
+    top: 78px; bottom: 78px;
+    width: 1px;
+    background: var(--rule);
+    z-index: 0;
+    opacity: 0.6;
+  }
+  .rule.left  { left: 44px; }
+  .rule.right { right: 44px; }
+
+  /* responsive */
+  @media (max-width: 720px) {
+    .chrome { padding: 18px 22px; }
+    footer { padding: 18px 22px; flex-direction: column; gap: 18px; align-items: flex-start; }
+    .rule.left { left: 22px; } .rule.right { right: 22px; }
+    .l1 { padding-left: 8vw; }
+    .l2 { padding-left: 18vw; }
+    .l3 { padding-right: 6vw; }
+  }
+
+  #root { min-height: 100vh; display: flex; flex-direction: column; }
+</style>
+</head>
+<body data-mode="light" data-align="napkin" data-font="instrument" data-anim="on">
+
+<header class="chrome">
+  <span class="mark"><span class="dot"></span>Manifiesto · 01</span>
+  <span class="meta">
+    <span>MMXXVI</span>
+    <span>04 · 05</span>
+  </span>
+</header>
+
+<span class="rule left"></span>
+<span class="rule right"></span>
+
+<main>
+  <div class="manifesto">
+    <span class="line l1">Sé el arquitecto</span>
+    <span class="line l2">de tu vida,</span>
+    <span class="line l3">y deja</span>
+    <span class="line l4">a la <span class="ia">IA</span> hacer el resto.</span>
+  </div>
+</main>
+
+<footer>
+  <div class="left">Una invitación a diseñar la intención,<br/>y delegar la ejecución.</div>
+  <div class="right">
+    <button class="pill" id="replay">Reproducir ↻</button>
+    <span class="num">001 / 001</span>
+  </div>
+</footer>
+
+<div id="tweaks-root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script>
+  // Replay button reflows the animation
+  document.getElementById('replay').addEventListener('click', () => {
+    const lines = document.querySelectorAll('.line');
+    lines.forEach(l => {
+      l.style.animation = 'none';
+      void l.offsetWidth; // reflow
+      l.style.animation = '';
+    });
+    const ia = document.querySelector('.ia');
+    if (ia) {
+      ia.style.setProperty('--reset', '0');
+      const after = ia;
+      after.classList.remove('replay');
+      void after.offsetWidth;
+      after.classList.add('replay');
+    }
+  });
+</script>
+
+<script type="text/babel" data-presets="env,react">
+const { useEffect } = React;
+const { TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakSelect, TweakColor, TweakText, TweakButton } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "mode": "light",
+  "align": "napkin",
+  "font": "instrument",
+  "animate": true,
+  "accent": "#b04a2a",
+  "phrase": "default",
+  "line1": "Sé el arquitecto",
+  "line2": "de tu vida,",
+  "line3": "y deja",
+  "line4": "a la IA hacer el resto."
+}/*EDITMODE-END*/;
+
+const PHRASES = {
+  default: ["Sé el arquitecto", "de tu vida,", "y deja", "a la IA hacer el resto."],
+  alt1:    ["Diseña tu intención.", "Automatiza", "lo demás", "con la IA a tu favor."],
+  alt2:    ["Tú eliges", "el rumbo —", "la IA pone", "los remos en el agua."],
+  custom:  null
+};
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // apply DOM-level dataset switches
+  useEffect(() => {
+    document.body.dataset.mode = t.mode;
+    document.body.dataset.align = t.align;
+    document.body.dataset.font = t.font;
+    document.body.dataset.anim = t.animate ? 'on' : 'off';
+    document.documentElement.style.setProperty('--accent', t.accent);
+  }, [t.mode, t.align, t.font, t.animate, t.accent]);
+
+  // swap phrase content
+  useEffect(() => {
+    const lines = (t.phrase === 'custom')
+      ? [t.line1, t.line2, t.line3, t.line4]
+      : PHRASES[t.phrase] || PHRASES.default;
+
+    const els = ['.l1','.l2','.l3','.l4'].map(s => document.querySelector(s));
+    els.forEach((el, i) => {
+      if (!el) return;
+      // preserve the "IA" italic+underline on the last line if it's the default-style phrase
+      if (i === 3 && /\bIA\b/.test(lines[i])) {
+        el.innerHTML = lines[i].replace(/\bIA\b/, '<span class="ia">IA</span>');
+      } else {
+        el.textContent = lines[i] || '';
+      }
+    });
+
+    // re-trigger entry animation
+    if (t.animate) {
+      els.forEach(el => {
+        if (!el) return;
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+      });
+    }
+  }, [t.phrase, t.line1, t.line2, t.line3, t.line4, t.animate]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Composición">
+        <TweakRadio
+          label="Alineación"
+          value={t.align}
+          options={[
+            { value: 'napkin',   label: 'Boceto' },
+            { value: 'centered', label: 'Centro' },
+            { value: 'left',     label: 'Izq.'   },
+          ]}
+          onChange={v => setTweak('align', v)}
+        />
+        <TweakRadio
+          label="Modo"
+          value={t.mode}
+          options={[
+            { value: 'light', label: 'Claro' },
+            { value: 'dark',  label: 'Oscuro' },
+          ]}
+          onChange={v => setTweak('mode', v)}
+        />
+        <TweakToggle
+          label="Animación de entrada"
+          value={t.animate}
+          onChange={v => setTweak('animate', v)}
+        />
+      </TweakSection>
+
+      <TweakSection title="Tipografía & color">
+        <TweakSelect
+          label="Familia"
+          value={t.font}
+          options={[
+            { value: 'instrument', label: 'Instrument Serif' },
+            { value: 'fraunces',   label: 'Fraunces' },
+            { value: 'newsreader', label: 'Newsreader' },
+          ]}
+          onChange={v => setTweak('font', v)}
+        />
+        <TweakColor
+          label="Acento"
+          value={t.accent}
+          onChange={v => setTweak('accent', v)}
+        />
+      </TweakSection>
+
+      <TweakSection title="Frase">
+        <TweakSelect
+          label="Versión"
+          value={t.phrase}
+          options={[
+            { value: 'default', label: 'Original' },
+            { value: 'alt1',    label: 'Alternativa A' },
+            { value: 'alt2',    label: 'Alternativa B' },
+            { value: 'custom',  label: 'Personalizada' },
+          ]}
+          onChange={v => setTweak('phrase', v)}
+        />
+        {t.phrase === 'custom' && (
+          <>
+            <TweakText label="Línea 1" value={t.line1} onChange={v => setTweak('line1', v)} />
+            <TweakText label="Línea 2" value={t.line2} onChange={v => setTweak('line2', v)} />
+            <TweakText label="Línea 3" value={t.line3} onChange={v => setTweak('line3', v)} />
+            <TweakText label="Línea 4" value={t.line4} onChange={v => setTweak('line4', v)} />
+          </>
+        )}
+        <TweakButton
+          label="Reproducir animación"
+          onClick={() => document.getElementById('replay').click()}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<App />);
+</script>
+
+</body>
+</html>
