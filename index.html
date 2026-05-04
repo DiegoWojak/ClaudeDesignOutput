@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sé el arquitecto de tu vida</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: oklch(0.965 0.012 85);
+    --ink: oklch(0.26 0.06 40);
+    --ink-soft: oklch(0.45 0.04 40);
+    --rule: oklch(0.85 0.02 80);
+    --accent: oklch(0.58 0.14 35);
+    --paper-shadow: oklch(0.92 0.018 80);
+  }
+  [data-mode="dark"] {
+    --bg: oklch(0.18 0.02 40);
+    --ink: oklch(0.94 0.02 85);
+    --ink-soft: oklch(0.72 0.03 80);
+    --rule: oklch(0.32 0.02 60);
+    --accent: oklch(0.72 0.13 45);
+    --paper-shadow: oklch(0.22 0.025 50);
+  }
+  [data-mode="shader"] {
+    --bg: #000;
+    --ink: oklch(0.98 0.01 85);
+    --ink-soft: oklch(0.78 0.04 80);
+    --rule: oklch(0.35 0.02 60);
+    --accent: oklch(0.82 0.16 60);
+    --paper-shadow: transparent;
+  }
+  [data-mode="shader"] body::before { display: none; }
+
+  /* shader canvas — full bleed background */
+  #shader-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    display: none;
+    background: #000;
+  }
+  [data-mode="shader"] #shader-canvas { display: block; }
+  [data-mode="shader"] .chrome,
+  [data-mode="shader"] main,
+  [data-mode="shader"] footer { position: relative; z-index: 2; }
+  [data-mode="shader"] .rule { display: none; }
+  [data-mode="shader"] .line {
+    /* legibility on busy background */
+    text-shadow: 0 2px 24px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.8);
+    mix-blend-mode: normal;
+  }
+  [data-mode="shader"] .l3 { color: var(--accent); }
+  [data-mode="shader"] .l2 { color: oklch(0.85 0.04 80); }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Instrument Serif', 'Fraunces', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background 600ms ease, color 600ms ease;
+  }
+
+  /* paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(var(--paper-shadow) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    z-index: 0;
+  }
+  [data-mode="dark"] body::before { mix-blend-mode: screen; opacity: 0.12; }
+
+  /* top bar */
+  .chrome {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 28px 44px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .chrome .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chrome .mark .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  .chrome .meta {
+    display: flex;
+    gap: 28px;
+  }
+
+  /* main stage */
+  main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 80px;
+  }
+
+  .manifesto {
+    width: 100%;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05em;
+  }
+
+  .line {
+    display: block;
+    font-size: clamp(56px, 11vw, 176px);
+    padding: 0 6vw;
+    color: var(--ink);
+    will-change: transform, opacity, filter;
+  }
+
+  /* layout matches the napkin: short-long / short-mid / med-right / full-bleed */
+  .l1 {
+    text-align: left;
+    padding-left: 10vw;
+    font-style: normal;
+  }
+  .l2 {
+    text-align: left;
+    padding-left: 22vw;
+    font-size: clamp(40px, 6.5vw, 100px);
+    color: var(--ink-soft);
+    font-style: italic;
+    letter-spacing: -0.01em;
+    margin-top: 0.1em;
+  }
+  .l3 {
+    text-align: right;
+    padding-right: 10vw;
+    color: var(--accent);
+    font-style: italic;
+    font-size: clamp(48px, 9vw, 140px);
+    margin-top: 0.15em;
+  }
+  .l4 {
+    text-align: left;
+    padding-left: 4vw;
+    padding-right: 4vw;
+    margin-top: 0.05em;
+    font-size: clamp(48px, 10.5vw, 168px);
+  }
+
+  [data-align="centered"] .l1 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l2 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l3 { padding-left: 0; padding-right: 0; text-align: center; }
+  [data-align="centered"] .l4 { text-align: center; }
+
+  [data-align="left"] .l1,
+  [data-align="left"] .l2,
+  [data-align="left"] .l3,
+  [data-align="left"] .l4 {
+    text-align: left;
+    padding-left: 6vw;
+    padding-right: 6vw;
+  }
+
+  /* font system swap */
+  [data-font="newsreader"] .manifesto { font-family: 'Newsreader', Georgia, serif; }
+  [data-font="fraunces"]   .manifesto { font-family: 'Fraunces', Georgia, serif; font-weight: 350; }
+  [data-font="instrument"] .manifesto { font-family: 'Instrument Serif', Georgia, serif; }
+
+  /* underline accent under "IA" */
+  .ia {
+    position: relative;
+    display: inline-block;
+    font-style: italic;
+    margin: 0 0.22em;
+  }
+  .ia::after {
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: 0.06em;
+    height: 0.07em;
+    background: var(--accent);
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: drawline 1100ms cubic-bezier(.7,0,.2,1) 1900ms forwards;
+  }
+
+  @keyframes drawline {
+    to { transform: scaleX(1); }
+  }
+
+  /* line entry animation */
+  .line {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    will-change: transform, opacity, filter;
+  }
+  body[data-anim="on"] .line {
+    animation: rise 1100ms cubic-bezier(.2,.7,.2,1) backwards;
+  }
+  body[data-anim="on"] .l1 { animation-delay: 200ms; }
+  body[data-anim="on"] .l2 { animation-delay: 600ms; }
+  body[data-anim="on"] .l3 { animation-delay: 1000ms; }
+  body[data-anim="on"] .l4 { animation-delay: 1400ms; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  }
+
+  body[data-anim="off"] .line { animation: none; }
+  body[data-anim="off"] .ia::after {
+    transform: scaleX(1); animation: none;
+  }
+
+  /* footer */
+  footer {
+    position: relative;
+    z-index: 2;
+    padding: 28px 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  footer .left { max-width: 38ch; line-height: 1.6; text-transform: none; letter-spacing: 0.02em; font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--ink-soft); }
+  footer .right { display: flex; gap: 28px; align-items: flex-end; }
+  footer .num { font-size: 11px; }
+  footer .pill {
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 8px 14px;
+    color: var(--ink);
+    background: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    cursor: pointer;
+    transition: background 200ms, color 200ms;
+  }
+  footer .pill:hover { background: var(--ink); color: var(--bg); }
+
+  /* a vertical hairline between the stage and the chrome to suggest a printed page */
+  .rule {
+    position: fixed;
+    top: 78px; bottom: 78px;
+    width: 1px;
+    background: var(--rule);
+    z-index: 0;
+    opacity: 0.6;
+  }
+  .rule.left  { left: 44px; }
+  .rule.right { right: 44px; }
+
+  /* responsive */
+  @media (max-width: 720px) {
+    .chrome { padding: 18px 22px; }
+    footer { padding: 18px 22px; flex-direction: column; gap: 18px; align-items: flex-start; }
+    .rule.left { left: 22px; } .rule.right { right: 22px; }
+    .l1 { padding-left: 8vw; }
+    .l2 { padding-left: 18vw; }
+    .l3 { padding-right: 6vw; }
+  }
+
+  #root { min-height: 100vh; display: flex; flex-direction: column; }
+</style>
+</head>
+<body data-mode="shader" data-align="napkin" data-font="instrument" data-anim="on">
+
+<canvas id="shader-canvas"></canvas>
+
+<header class="chrome">
+  <span class="mark"><span class="dot"></span>Manifiesto · 01</span>
+  <span class="meta">
+    <span>MMXXVI</span>
+    <span>04 · 05</span>
+  </span>
+</header>
+
+<span class="rule left"></span>
+<span class="rule right"></span>
+
+<main>
+  <div class="manifesto">
+    <span class="line l1">Sé el arquitecto</span>
+    <span class="line l2">de tu vida,</span>
+    <span class="line l3">y deja</span>
+    <span class="line l4">a la <span class="ia">IA</span> hacer el resto.</span>
+  </div>
+</main>
+
+<footer>
+  <div class="left">Una invitación a diseñar la intención,<br/>y delegar la ejecución.</div>
+  <div class="right">
+    <button class="pill" id="replay">Reproducir ↻</button>
+    <span class="num">001 / 001</span>
+  </div>
+</footer>
+
+<div id="tweaks-root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script>
+  // Replay button reflows the animation
+  document.getElementById('replay').addEventListener('click', () => {
+    const lines = document.querySelectorAll('.line');
+    lines.forEach(l => {
+      l.style.animation = 'none';
+      void l.offsetWidth; // reflow
+      l.style.animation = '';
+    });
+    const ia = document.querySelector('.ia');
+    if (ia) {
+      ia.style.setProperty('--reset', '0');
+      const after = ia;
+      after.classList.remove('replay');
+      void after.offsetWidth;
+      after.classList.add('replay');
+    }
+  });
+</script>
+
+<!-- ===== Shader background (kaleidoscopic fractal + ASCII pass) ===== -->
+<script>
+(() => {
+  const canvas = document.getElementById('shader-canvas');
+  const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+  if (!gl) { console.warn('WebGL not available'); return; }
+
+  const VERT = `
+    attribute vec2 a_pos;
+    void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }
+  `;
+
+  const FRAG_FRACTAL = `
+    precision highp float;
+    uniform vec2 iResolution;
+    uniform float iTime;
+    vec3 palette(float t){
+      vec3 a = vec3(0.5);
+      vec3 b = vec3(1.0);
+      vec3 c = vec3(2.0);
+      vec3 d = vec3(0.0, 0.333, 0.667);
+      return a + b*cos(6.28318*(c*t + d));
+    }
+    void main(){
+      vec2 fragCoord = gl_FragCoord.xy;
+      vec2 uv = (fragCoord*2.0 - iResolution.xy) / iResolution.y;
+      vec2 uv0 = uv;
+      vec3 finalColor = vec3(0.0);
+      for (float i = 0.0; i < 4.0; i++){
+        uv = fract(uv*1.5) - 0.5;
+        float d = length(uv) * exp(-length(uv0));
+        vec3 col = palette(length(uv0) + i*0.4 + iTime*0.4);
+        d = sin(d*8.0 + iTime)/8.0;
+        d = abs(d);
+        d = pow(0.01/d, 1.2);
+        finalColor += col * d;
+      }
+      vec3 q = vec3(1.0);
+      gl_FragColor = vec4(floor(finalColor.rgb*q)/q, 1.0);
+    }
+  `;
+
+  const FRAG_ASCII = `
+    precision highp float;
+    uniform vec2 iResolution;
+    uniform sampler2D iChannel0;
+    uniform float iIntensity;
+    float character(int n, vec2 p){
+      p = floor(p*vec2(-4.0, 4.0) + 2.5);
+      if (clamp(p.x, 0.0, 4.0) == p.x){
+        if (clamp(p.y, 0.0, 4.0) == p.y){
+          float a = p.x + 5.0*p.y;
+          float bit = mod(floor(float(n) / pow(2.0, a)), 2.0);
+          if (bit >= 1.0) return 1.0;
+        }
+      }
+      return 0.0;
+    }
+    void main(){
+      vec2 pix = gl_FragCoord.xy;
+      vec2 sampleUV = floor(pix/16.0)*16.0 / iResolution.xy;
+      vec3 col = texture2D(iChannel0, sampleUV).rgb;
+      float gray = 0.3*col.r + 0.59*col.g + 0.11*col.b;
+      int n = 4096;
+      if (gray > 0.0233) n = 4096;
+      if (gray > 0.0465) n = 131200;
+      if (gray > 0.0698) n = 4329476;
+      if (gray > 0.0930) n = 459200;
+      if (gray > 0.1163) n = 4591748;
+      if (gray > 0.1395) n = 12652620;
+      if (gray > 0.1628) n = 14749828;
+      if (gray > 0.1860) n = 18393220;
+      if (gray > 0.2093) n = 15239300;
+      if (gray > 0.2326) n = 17318431;
+      if (gray > 0.2558) n = 32641156;
+      if (gray > 0.2791) n = 18393412;
+      if (gray > 0.3023) n = 18157905;
+      if (gray > 0.3256) n = 17463428;
+      if (gray > 0.3488) n = 14954572;
+      if (gray > 0.3721) n = 13177118;
+      if (gray > 0.3953) n = 6566222;
+      if (gray > 0.4186) n = 16269839;
+      if (gray > 0.4419) n = 18444881;
+      if (gray > 0.4651) n = 18400814;
+      if (gray > 0.4884) n = 33061392;
+      if (gray > 0.5116) n = 15255086;
+      if (gray > 0.5349) n = 32045584;
+      if (gray > 0.5581) n = 18405034;
+      if (gray > 0.5814) n = 15022158;
+      if (gray > 0.6047) n = 15018318;
+      if (gray > 0.6279) n = 16272942;
+      if (gray > 0.6512) n = 18415153;
+      if (gray > 0.6744) n = 32641183;
+      if (gray > 0.6977) n = 32540207;
+      if (gray > 0.7209) n = 18732593;
+      if (gray > 0.7442) n = 18667121;
+      if (gray > 0.7674) n = 16267326;
+      if (gray > 0.7907) n = 32575775;
+      if (gray > 0.8140) n = 15022414;
+      if (gray > 0.8372) n = 15255537;
+      if (gray > 0.8605) n = 32032318;
+      if (gray > 0.8837) n = 32045617;
+      if (gray > 0.9070) n = 33081316;
+      if (gray > 0.9302) n = 32045630;
+      if (gray > 0.9535) n = 33061407;
+      if (gray > 0.9767) n = 11512810;
+      vec2 p = mod(pix/8.0, 2.0) - vec2(1.0);
+      vec3 outc = col * character(n, p);
+      gl_FragColor = vec4(outc * iIntensity, 1.0);
+    }
+  `;
+
+  function compile(src, type){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vs, fs){
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(vs, gl.VERTEX_SHADER));
+    gl.attachShader(p, compile(fs, gl.FRAGMENT_SHADER));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(p));
+    return p;
+  }
+
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+
+  const pFractal = program(VERT, FRAG_FRACTAL);
+  const pAscii   = program(VERT, FRAG_ASCII);
+
+  function bindQuad(prog){
+    const loc = gl.getAttribLocation(prog, 'a_pos');
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  }
+
+  const fbo = gl.createFramebuffer();
+  const fboTex = gl.createTexture();
+  function resizeFBO(w, h){
+    gl.bindTexture(gl.TEXTURE_2D, fboTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTex, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+  let W = 0, H = 0;
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
+    if (w === W && h === H) return;
+    W = w; H = h;
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    resizeFBO(w, h);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const t0 = performance.now();
+  let rafId = 0, running = false;
+  window.__shaderIntensity = 0.9;
+
+  function frame(){
+    if (!running) return;
+    resize();
+    const t = (performance.now() - t0) / 1000;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.viewport(0, 0, W, H);
+    gl.useProgram(pFractal);
+    bindQuad(pFractal);
+    gl.uniform2f(gl.getUniformLocation(pFractal, 'iResolution'), W, H);
+    gl.uniform1f(gl.getUniformLocation(pFractal, 'iTime'), t);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, W, H);
+    gl.useProgram(pAscii);
+    bindQuad(pAscii);
+    gl.uniform2f(gl.getUniformLocation(pAscii, 'iResolution'), W, H);
+    gl.uniform1f(gl.getUniformLocation(pAscii, 'iIntensity'), window.__shaderIntensity);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fboTex);
+    gl.uniform1i(gl.getUniformLocation(pAscii, 'iChannel0'), 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  window.__shader = {
+    start(){ if (!running){ running = true; rafId = requestAnimationFrame(frame); } },
+    stop(){ running = false; cancelAnimationFrame(rafId); }
+  };
+
+  const obs = new MutationObserver(() => {
+    if (document.body.dataset.mode === 'shader') window.__shader.start();
+    else window.__shader.stop();
+  });
+  obs.observe(document.body, { attributes: true, attributeFilter: ['data-mode'] });
+  if (document.body.dataset.mode === 'shader') window.__shader.start();
+})();
+</script>
+
+<script type="text/babel" data-presets="env,react">
+const { useEffect } = React;
+const { TweaksPanel, useTweaks, TweakSection, TweakRadio, TweakToggle, TweakSelect, TweakColor, TweakText, TweakButton, TweakSlider } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "mode": "shader",
+  "align": "napkin",
+  "font": "instrument",
+  "animate": true,
+  "accent": "#b04a2a",
+  "phrase": "default",
+  "shaderIntensity": 0.9,
+  "line1": "Sé el arquitecto",
+  "line2": "de tu vida,",
+  "line3": "y deja",
+  "line4": "a la IA hacer el resto."
+}/*EDITMODE-END*/;
+
+const PHRASES = {
+  default: ["Sé el arquitecto", "de tu vida,", "y deja", "a la IA hacer el resto."],
+  alt1:    ["Diseña tu intención.", "Automatiza", "lo demás", "con la IA a tu favor."],
+  alt2:    ["Tú eliges", "el rumbo —", "la IA pone", "los remos en el agua."],
+  custom:  null
+};
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // apply DOM-level dataset switches
+  useEffect(() => {
+    document.body.dataset.mode = t.mode;
+    document.body.dataset.align = t.align;
+    document.body.dataset.font = t.font;
+    document.body.dataset.anim = t.animate ? 'on' : 'off';
+    document.documentElement.style.setProperty('--accent', t.accent);
+    window.__shaderIntensity = t.shaderIntensity;
+  }, [t.mode, t.align, t.font, t.animate, t.accent, t.shaderIntensity]);
+
+  // swap phrase content
+  useEffect(() => {
+    const lines = (t.phrase === 'custom')
+      ? [t.line1, t.line2, t.line3, t.line4]
+      : PHRASES[t.phrase] || PHRASES.default;
+
+    const els = ['.l1','.l2','.l3','.l4'].map(s => document.querySelector(s));
+    els.forEach((el, i) => {
+      if (!el) return;
+      // preserve the "IA" italic+underline on the last line if it's the default-style phrase
+      if (i === 3 && /\bIA\b/.test(lines[i])) {
+        el.innerHTML = lines[i].replace(/\bIA\b/, '<span class="ia">IA</span>');
+      } else {
+        el.textContent = lines[i] || '';
+      }
+    });
+
+    // re-trigger entry animation
+    if (t.animate) {
+      els.forEach(el => {
+        if (!el) return;
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+      });
+    }
+  }, [t.phrase, t.line1, t.line2, t.line3, t.line4, t.animate]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Composición">
+        <TweakRadio
+          label="Alineación"
+          value={t.align}
+          options={[
+            { value: 'napkin',   label: 'Boceto' },
+            { value: 'centered', label: 'Centro' },
+            { value: 'left',     label: 'Izq.'   },
+          ]}
+          onChange={v => setTweak('align', v)}
+        />
+        <TweakRadio
+          label="Modo"
+          value={t.mode}
+          options={[
+            { value: 'light', label: 'Claro' },
+            { value: 'dark',  label: 'Oscuro' },
+            { value: 'shader', label: 'Shader' },
+          ]}
+          onChange={v => setTweak('mode', v)}
+        />
+        <TweakToggle
+          label="Animación de entrada"
+          value={t.animate}
+          onChange={v => setTweak('animate', v)}
+        />
+        {t.mode === 'shader' && (
+          <TweakSlider
+            label="Intensidad shader"
+            value={t.shaderIntensity}
+            min={0.2} max={1.5} step={0.05}
+            onChange={v => setTweak('shaderIntensity', v)}
+          />
+        )}
+      </TweakSection>
+
+      <TweakSection title="Tipografía & color">
+        <TweakSelect
+          label="Familia"
+          value={t.font}
+          options={[
+            { value: 'instrument', label: 'Instrument Serif' },
+            { value: 'fraunces',   label: 'Fraunces' },
+            { value: 'newsreader', label: 'Newsreader' },
+          ]}
+          onChange={v => setTweak('font', v)}
+        />
+        <TweakColor
+          label="Acento"
+          value={t.accent}
+          onChange={v => setTweak('accent', v)}
+        />
+      </TweakSection>
+
+      <TweakSection title="Frase">
+        <TweakSelect
+          label="Versión"
+          value={t.phrase}
+          options={[
+            { value: 'default', label: 'Original' },
+            { value: 'alt1',    label: 'Alternativa A' },
+            { value: 'alt2',    label: 'Alternativa B' },
+            { value: 'custom',  label: 'Personalizada' },
+          ]}
+          onChange={v => setTweak('phrase', v)}
+        />
+        {t.phrase === 'custom' && (
+          <>
+            <TweakText label="Línea 1" value={t.line1} onChange={v => setTweak('line1', v)} />
+            <TweakText label="Línea 2" value={t.line2} onChange={v => setTweak('line2', v)} />
+            <TweakText label="Línea 3" value={t.line3} onChange={v => setTweak('line3', v)} />
+            <TweakText label="Línea 4" value={t.line4} onChange={v => setTweak('line4', v)} />
+          </>
+        )}
+        <TweakButton
+          label="Reproducir animación"
+          onClick={() => document.getElementById('replay').click()}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<App />);
+</script>
+
+</body>
+</html>
